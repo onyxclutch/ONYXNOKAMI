@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ONYXNOKAMI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #f7f2ff;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(144, 70, 255, 0.35), transparent 34%),
+        linear-gradient(135deg, #09090d 0%, #15101f 45%, #0b1016 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .chat {
+      width: min(460px, 100%);
+      height: min(720px, 92vh);
+      border: 1px solid rgba(202, 170, 255, 0.22);
+      background: rgba(14, 13, 22, 0.86);
+      box-shadow:
+        0 0 45px rgba(139, 92, 246, 0.32),
+        0 24px 80px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 18px;
+      border-bottom: 1px solid rgba(202, 170, 255, 0.16);
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.35), rgba(20, 184, 166, 0.12));
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+      color: #cfc5e8;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    .message {
+      max-width: 86%;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      line-height: 1.45;
+      font-size: 15px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      margin-left: auto;
+      background: linear-gradient(135deg, #2563eb, #0891b2);
+      color: white;
+    }
+
+    .onyx {
+      margin-right: auto;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(202, 170, 255, 0.18);
+      color: #f0e8ff;
+    }
+
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid rgba(202, 170, 255, 0.16);
+      background: rgba(7, 7, 12, 0.9);
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid rgba(202, 170, 255, 0.18);
+      outline: none;
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+      padding: 13px 14px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: rgba(168, 85, 247, 0.9);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 0 18px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat">
+    <div class="header">
+      <div class="title">ONYXNOKAMI</div>
+      <div class="subtitle">drop the vibe. ONYX got the anime recs.</div>
+    </div>
+
+    <div id="messages" class="messages">
+      <div class="message onyx">yoo, what anime vibe we feeling?</div>
+    </div>
+
+    <div class="input-bar">
+      <input id="input" placeholder="dark, funny, romance, emotional..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/chat";
+
+    function addMessage(text, className) {
+      const messages = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = `message ${className}`;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("input");
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      addMessage(text, "user");
+      input.value = "";
+
+      const thinking = addMessage("thinking...", "onyx");
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const data = await res.json();
+        thinking.textContent = data.reply;
+      } catch {
+        thinking.textContent = "my anime sense is foggy rn. try again.";
+      }
+    }
+
+    document.getElementById("input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
